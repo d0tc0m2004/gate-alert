@@ -2,30 +2,64 @@
   'use strict';
 
   // ============================================================
-  // TRAIN SCHEDULE DATA — 19 trains halting at Nallapadu Jn (NLPD)
-  // Times are scheduled arrival at NLPD in IST (24h format)
-  // Source: Indian Railways timetable
+  // TRAIN SCHEDULE DATA
+  // Times = estimated time at NLPD gate area in IST (24h)
+  // days: null = daily, array of day numbers (0=Sun, 1=Mon ... 6=Sat)
+  // Halting trains: exact NLPD timetable times
+  // Non-stopping trains: estimated from GNT time ± 5 min
   // ============================================================
   var TRAINS = [
-    { id: '56503', name: 'Bengaluru Cantt – Vijayawada Pass.', time: '03:43', type: 'Passenger' },
-    { id: '77281', name: 'Guntur – Kacheguda DEMU',           time: '05:31', type: 'DEMU' },
-    { id: '77248', name: 'Tenali – Markapur Road DEMU',       time: '06:11', type: 'DEMU' },
-    { id: '67228', name: 'Macherla – Vijayawada MEMU',        time: '07:31', type: 'MEMU' },
-    { id: '57203', name: 'Guntur – Macherla Pass.',            time: '08:10', type: 'Passenger' },
-    { id: '57317', name: 'Guntur – Macherla Pass.',            time: '08:13', type: 'Passenger' },
-    { id: '17329', name: 'Hubballi – Vijayawada Exp.',         time: '08:14', type: 'Express' },
-    { id: '67213', name: 'Macherla – Vijayawada MEMU',        time: '08:45', type: 'MEMU' },
-    { id: '67239', name: 'Markapur Rd – Tenali MEMU',         time: '11:49', type: 'MEMU' },
-    { id: '57328', name: 'Guntur – Dhone Pass.',               time: '12:21', type: 'Passenger' },
-    { id: '77249', name: 'Markapur Rd – Tenali DEMU',         time: '13:01', type: 'DEMU' },
-    { id: '57327', name: 'Dhone – Guntur Pass.',               time: '14:29', type: 'Passenger' },
-    { id: '17330', name: 'Vijayawada – Hubballi Exp.',         time: '14:46', type: 'Express' },
-    { id: '77297', name: 'Tenali – Macherla DEMU',            time: '17:23', type: 'DEMU' },
-    { id: '67227', name: 'Vijayawada – Macherla MEMU',        time: '17:55', type: 'MEMU' },
-    { id: '57204', name: 'Macherla – Guntur Pass.',            time: '18:34', type: 'Passenger' },
-    { id: '57320', name: 'Macherla – Guntur Pass.',            time: '19:09', type: 'Passenger' },
-    { id: '77282', name: 'Kacheguda – Guntur DEMU',           time: '21:51', type: 'DEMU' },
-    { id: '56504', name: 'Vijayawada – Bengaluru Pass.',       time: '22:11', type: 'Passenger' },
+    // --- 19 trains that HALT at Nallapadu Jn (exact times) ---
+    { id: '56503', name: 'Bengaluru Cantt – BZA Pass.',   time: '03:43', type: 'Passenger', days: null },
+    { id: '77281', name: 'Guntur – Kacheguda DEMU',       time: '05:31', type: 'DEMU',      days: null },
+    { id: '77248', name: 'Tenali – Markapur Rd DEMU',     time: '06:11', type: 'DEMU',      days: null },
+    { id: '67228', name: 'Macherla – BZA MEMU',           time: '07:31', type: 'MEMU',      days: null },
+    { id: '57203', name: 'Guntur – Macherla Pass.',        time: '08:10', type: 'Passenger', days: null },
+    { id: '57317', name: 'Guntur – Macherla Pass.',        time: '08:13', type: 'Passenger', days: null },
+    { id: '17329', name: 'Hubballi – BZA Exp.',            time: '08:14', type: 'Express',   days: null },
+    { id: '67213', name: 'Macherla – BZA MEMU',           time: '08:45', type: 'MEMU',      days: null },
+    { id: '67239', name: 'Markapur Rd – Tenali MEMU',     time: '11:49', type: 'MEMU',      days: null },
+    { id: '57328', name: 'Guntur – Dhone Pass.',           time: '12:21', type: 'Passenger', days: null },
+    { id: '77249', name: 'Markapur Rd – Tenali DEMU',     time: '13:01', type: 'DEMU',      days: null },
+    { id: '57327', name: 'Dhone – Guntur Pass.',           time: '14:29', type: 'Passenger', days: null },
+    { id: '17330', name: 'BZA – Hubballi Exp.',            time: '14:46', type: 'Express',   days: null },
+    { id: '77297', name: 'Tenali – Macherla DEMU',        time: '17:23', type: 'DEMU',      days: null },
+    { id: '67227', name: 'BZA – Macherla MEMU',           time: '17:55', type: 'MEMU',      days: null },
+    { id: '57204', name: 'Macherla – Guntur Pass.',        time: '18:34', type: 'Passenger', days: null },
+    { id: '57320', name: 'Macherla – Guntur Pass.',        time: '19:09', type: 'Passenger', days: null },
+    { id: '77282', name: 'Kacheguda – Guntur DEMU',       time: '21:51', type: 'DEMU',      days: null },
+    { id: '56504', name: 'BZA – Bengaluru Pass.',          time: '22:11', type: 'Passenger', days: null },
+
+    // --- Non-stopping trains (estimated NLPD times from GNT ±5 min) ---
+    // UP direction: NLPD time ~ GNT arrival - 5 min
+    { id: '17226', name: 'Hubballi – Narasapur Amaravati', time: '02:20', type: 'Express', days: null },
+    { id: '18464', name: 'Prasanti Exp. (SBC–BBS)',        time: '03:25', type: 'Express', days: null },
+    { id: '17216', name: 'Dharmavaram – MTM Exp.',         time: '04:35', type: 'Express', days: null },
+    { id: '17262', name: 'Tirupati – Guntur Exp.',         time: '07:15', type: 'Express', days: null },
+    { id: '17252', name: 'Kacheguda – Guntur Exp.',        time: '10:35', type: 'Express', days: null },
+    { id: '17227', name: 'Dhone – Guntur Exp.',            time: '13:55', type: 'Express', days: null },
+    { id: '17254', name: 'Aurangabad – Guntur Exp.',       time: '21:50', type: 'Express', days: null },
+    // DOWN direction: NLPD time ~ GNT departure + 5 min
+    { id: '67238', name: 'Repalle – Markapur Rd MEMU',    time: '06:20', type: 'MEMU',    days: null },
+    { id: '17253', name: 'Guntur – Aurangabad Exp.',       time: '07:25', type: 'Express', days: null },
+    { id: '17228', name: 'Guntur – Dhone Exp.',            time: '13:05', type: 'Express', days: null },
+    { id: '17261', name: 'Guntur – Tirupati Exp.',         time: '16:35', type: 'Express', days: null },
+    { id: '17251', name: 'Guntur – Kacheguda Exp.',        time: '18:45', type: 'Express', days: null },
+    { id: '18463', name: 'Prasanti Exp. (BBS–SBC)',        time: '20:40', type: 'Express', days: null },
+    { id: '17225', name: 'Narasapur – Hubballi Amaravati', time: '21:15', type: 'Express', days: null },
+    { id: '17215', name: 'MTM – Dharmavaram Exp.',         time: '22:45', type: 'Express', days: null },
+
+    // --- Weekly / bi-weekly non-stopping trains ---
+    // DOWN
+    { id: '22883', name: 'Puri – YPR Garib Rath',          time: '06:35', type: 'Express', days: [6] },       // Sat
+    { id: '22831', name: 'Howrah – YPR Superfast',          time: '10:45', type: 'Express', days: [4] },       // Thu
+    { id: '18047', name: 'Shalimar – Vasco Amaravati',      time: '20:15', type: 'Express', days: [0,2,3,5] }, // Sun,Tue,Wed,Fri
+    { id: '17211', name: 'Kondaveedu Exp. (BZA–KCG)',       time: '19:00', type: 'Express', days: [1,3,5] },   // Mon,Wed,Fri
+    // UP
+    { id: '18048', name: 'Vasco – Shalimar Amaravati',      time: '01:05', type: 'Express', days: [0,2,4,5] }, // Sun,Tue,Thu,Fri
+    { id: '17212', name: 'Kondaveedu Exp. (KCG–BZA)',       time: '01:30', type: 'Express', days: [2,4,6] },   // Tue,Thu,Sat
+    { id: '22884', name: 'YPR – Puri Garib Rath',           time: '11:15', type: 'Express', days: [0] },       // Sun
+    { id: '22832', name: 'YPR – Howrah Superfast',           time: '16:35', type: 'Express', days: [5] },       // Fri
   ];
 
   // ============================================================
@@ -112,7 +146,14 @@
   // CORE LOGIC — Gate Window Calculation
   // ============================================================
   function computeGateWindows() {
-    var rawWindows = TRAINS.map(function (train) {
+    // Filter trains that run today (IST day of week)
+    var todayDay = getIST().getDay(); // 0=Sun, 1=Mon ... 6=Sat
+    var todayTrains = TRAINS.filter(function (train) {
+      if (!train.days) return true; // null = daily
+      return train.days.indexOf(todayDay) !== -1;
+    });
+
+    var rawWindows = todayTrains.map(function (train) {
       var trainTime = timeToDate(train.time);
       var closeTime = new Date(trainTime.getTime() - settings.closeBuffer * 60000);
       var openTime = new Date(trainTime.getTime() + settings.openBuffer * 60000);
