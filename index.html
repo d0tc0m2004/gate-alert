@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0a0e1a">
+  <meta name="description" content="Know when the railway gate between Nallapadu and Guntur will close — plan your trip and skip the traffic">
+  <title>Gate Alert — Nallapadu Railway Gate Tracker</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="mobile-web-app-capable" content="yes">
+</head>
+<body>
+  <div class="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-top">
+        <h1>Gate Alert</h1>
+        <button class="settings-toggle" id="settingsToggle" aria-label="Settings">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line>
+            <line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line>
+            <line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line>
+            <line x1="17" y1="16" x2="23" y2="16"></line>
+          </svg>
+        </button>
+      </div>
+      <p class="header-subtitle">Nallapadu – Guntur Railway Gate</p>
+      <div class="current-time" id="currentTime">--:--:-- AM</div>
+    </header>
+
+    <!-- Main Status Card -->
+    <div class="status-card" id="statusCard">
+      <div class="status-indicator" id="statusIndicator"></div>
+      <div class="status-label" id="statusLabel">Loading...</div>
+      <div class="status-sublabel" id="statusSublabel">Checking train schedule</div>
+      <div class="status-countdown" id="statusCountdown"></div>
+      <div class="status-advice" id="statusAdvice"></div>
+      <div class="status-train" id="statusTrain"></div>
+    </div>
+
+    <!-- Quick Info Cards -->
+    <div class="quick-info">
+      <div class="info-card">
+        <div class="info-icon">&#x1F6AB;</div>
+        <div class="info-text">
+          <span class="info-label">Next Closure</span>
+          <span class="info-value" id="nextClosureTime">--:--</span>
+        </div>
+      </div>
+      <div class="info-card">
+        <div class="info-icon">&#x2705;</div>
+        <div class="info-text">
+          <span class="info-label">Opens At</span>
+          <span class="info-value" id="nextSafeTime">--:--</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Departure Windows -->
+    <div class="section">
+      <h2 class="section-title">Safe Departure Windows</h2>
+      <div class="departure-list" id="departureList"></div>
+    </div>
+
+    <!-- Timeline -->
+    <div class="section">
+      <h2 class="section-title">Today's Timeline</h2>
+      <div class="timeline-container">
+        <div class="timeline-labels" id="timelineLabels"></div>
+        <div class="timeline-track" id="timelineTrack">
+          <div class="timeline-now" id="timelineNow"></div>
+        </div>
+        <div class="timeline-legend">
+          <span class="legend-item"><span class="legend-dot red"></span> Gate Closed</span>
+          <span class="legend-item"><span class="legend-dot blue"></span> Now</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Schedule -->
+    <div class="section">
+      <h2 class="section-title">Gate Closure Windows</h2>
+      <p class="section-hint">Estimated closure times based on 19 scheduled trains at Nallapadu Jn.</p>
+      <div class="schedule-list" id="scheduleList"></div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>Based on scheduled train times at Nallapadu Junction (NLPD)</p>
+      <p>Actual gate closure may vary by a few minutes. Freight trains not included.</p>
+      <p class="footer-tip">Tip: Adjust buffer times in settings to match your local gate timing</p>
+    </footer>
+  </div>
+
+  <!-- Settings Panel -->
+  <div class="settings-overlay" id="settingsOverlay"></div>
+  <div class="settings-panel" id="settingsPanel">
+    <div class="settings-header">
+      <h2>Settings</h2>
+      <button class="settings-close" id="settingsClose" aria-label="Close settings">&times;</button>
+    </div>
+    <div class="settings-content">
+      <div class="setting-group">
+        <label class="setting-label">
+          Travel time to gate
+          <span class="setting-value" id="travelTimeDisplay">10 min</span>
+        </label>
+        <input type="range" class="setting-range" id="travelTimeInput" min="1" max="30" value="10">
+        <p class="setting-hint">How long it takes you to drive from home to the railway gate</p>
+      </div>
+
+      <div class="setting-group">
+        <label class="setting-label">
+          Gate closes before train
+          <span class="setting-value" id="closeBufferDisplay">10 min</span>
+        </label>
+        <input type="range" class="setting-range" id="closeBufferInput" min="3" max="20" value="10">
+        <p class="setting-hint">How early the gate usually closes before a train passes</p>
+      </div>
+
+      <div class="setting-group">
+        <label class="setting-label">
+          Gate opens after train
+          <span class="setting-value" id="openBufferDisplay">5 min</span>
+        </label>
+        <input type="range" class="setting-range" id="openBufferInput" min="1" max="15" value="5">
+        <p class="setting-hint">How long after the train passes before the gate reopens</p>
+      </div>
+
+      <div class="setting-group">
+        <button class="btn btn-notify" id="notifyBtn">Enable Notifications</button>
+        <p class="setting-hint" id="notifyHint">Get browser alerts before upcoming gate closures</p>
+      </div>
+
+      <div class="setting-group">
+        <div class="setting-row">
+          <label class="setting-label" style="margin-bottom:0">
+            Sound &amp; vibration alerts
+          </label>
+          <label class="toggle-switch">
+            <input type="checkbox" id="soundToggle">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <p class="setting-hint">Alert sound + phone vibration when it's time to leave</p>
+      </div>
+
+      <div class="setting-group">
+        <div class="setting-row">
+          <label class="setting-label" style="margin-bottom:0">
+            Keep screen on
+          </label>
+          <label class="toggle-switch">
+            <input type="checkbox" id="wakeLockToggle">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <p class="setting-hint">Prevents your phone screen from turning off while the app is open</p>
+      </div>
+
+      <div class="setting-group">
+        <div class="disclaimer">
+          <strong>How this works:</strong> We use the official Indian Railways timetable for 19 trains
+          that pass through Nallapadu Junction daily. The gate between Nallapadu and Guntur closes
+          ~10 min before each train and reopens ~5 min after. These are estimates —
+          actual times depend on train delays and the gateman.
+          <br><br>
+          <strong>Not included:</strong> Freight trains, special trains, and trains that don't halt at NLPD.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

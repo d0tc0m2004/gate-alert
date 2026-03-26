@@ -1,0 +1,19 @@
+{
+  "name": "Gate Alert — Nallapadu Railway Gate Tracker",
+  "short_name": "Gate Alert",
+  "description": "Know when the railway gate between Nallapadu and Guntur will close. Plan your trip and skip the traffic.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0a0e1a",
+  "theme_color": "#0a0e1a",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["utilities", "navigation"]
+}
